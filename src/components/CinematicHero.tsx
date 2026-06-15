@@ -256,7 +256,7 @@ export default function CinematicHero() {
 
     let raf = 0;
     let last = performance.now();
-    let running = true;
+    let running = false;
 
     const frame = (now: number) => {
       const dt = Math.min((now - last) / 1000, 0.05);
@@ -274,23 +274,36 @@ export default function CinematicHero() {
       renderer.render(scene, camera);
       if (running) raf = requestAnimationFrame(frame);
     };
-    raf = requestAnimationFrame(frame);
+
+    const start = () => {
+      if (running) return;
+      running = true;
+      last = performance.now();
+      raf = requestAnimationFrame(frame);
+    };
+    const stop = () => {
+      running = false;
+      cancelAnimationFrame(raf);
+    };
+
+    // Render only while the hero is on screen (one heavy canvas at a time)
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !document.hidden) start();
+        else stop();
+      },
+      { threshold: 0 },
+    );
+    io.observe(container);
 
     const onVisibility = () => {
-      if (document.hidden) {
-        running = false;
-        cancelAnimationFrame(raf);
-      } else if (!running) {
-        running = true;
-        last = performance.now();
-        raf = requestAnimationFrame(frame);
-      }
+      if (document.hidden) stop();
     };
     document.addEventListener("visibilitychange", onVisibility);
 
     return () => {
-      running = false;
-      cancelAnimationFrame(raf);
+      stop();
+      io.disconnect();
       ro.disconnect();
       window.removeEventListener("pointermove", onMove);
       document.removeEventListener("visibilitychange", onVisibility);
