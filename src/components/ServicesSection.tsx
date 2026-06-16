@@ -155,32 +155,32 @@ const FRAG = /* glsl */ `
 const SERVICES = [
   {
     num: "01", name: "WEB DEVELOPMENT", side: "left",
-    lead: "We build", accent: "digital foundations.",
-    desc: "Scalable, secure systems engineered to grow with your business.",
+    lead: "Engineered", accent: "to last.",
+    desc: "Fast, secure, scalable systems — architected on fundamentals, not trends.",
     cats: ["Frontend", "Backend & APIs", "E‑commerce", "Headless CMS", "Web Apps"],
   },
   {
-    num: "02", name: "UI / UX DESIGN", side: "left",
-    lead: "Experiences", accent: "people remember.",
-    desc: "Interfaces designed around how people actually think and move.",
+    num: "02", name: "UI / UX DESIGN", side: "right",
+    lead: "Designed", accent: "to feel inevitable.",
+    desc: "Interfaces shaped around real behavior — intuitive, fluid, impossible to forget.",
     cats: ["Product Design", "Design Systems", "Prototyping", "User Research", "Interaction"],
   },
   {
-    num: "03", name: "AI & AUTOMATION", side: "right",
-    lead: "Intelligence", accent: "into every workflow.",
-    desc: "Models and agents that learn, decide, and act on their own.",
+    num: "03", name: "AI & AUTOMATION", side: "left",
+    lead: "Software", accent: "that thinks.",
+    desc: "Models and agents that learn, decide, and act — removing the work that slows you down.",
     cats: ["ML Models", "Agents & RAG", "Automation", "Chatbots", "Analytics"],
   },
   {
-    num: "04", name: "CLOUD INFRASTRUCTURE", side: "left",
-    lead: "Built", accent: "for scale.",
-    desc: "Resilient, observable platforms ready before the load arrives.",
+    num: "04", name: "CLOUD INFRASTRUCTURE", side: "right",
+    lead: "Ready", accent: "for anything.",
+    desc: "Resilient, observable platforms that scale long before the load ever arrives.",
     cats: ["AWS · GCP · Azure", "DevOps", "Kubernetes", "CI/CD", "Observability"],
   },
   {
-    num: "05", name: "DIGITAL TRANSFORMATION", side: "right",
-    lead: "Everything", accent: "connected.",
-    desc: "Strategy, modernization and integration as one moving system.",
+    num: "05", name: "DIGITAL TRANSFORMATION", side: "left",
+    lead: "One", accent: "moving system.",
+    desc: "Strategy, modernization and integration unified into a single force for growth.",
     cats: ["Strategy", "Modernization", "Integration", "Data Platforms", "Enablement"],
   },
 ];
@@ -195,12 +195,16 @@ type P = {
 // glides corner-to-corner; the text sits in the open space opposite it.
 // Shape params are identical across every waypoint for a consistent object.
 const BASE = { open: 0.92, complex: 0.6, ui: 0, cloud: 0, emission: 0.3, evolve: 0.15 };
+// Object alternates right/left at mid-height (no bottom drops) and sits large
+// so it reaches toward centre — keeping the gap to the copy tight.
+// Object alternates right/left at mid-height (no bottom drops) and sits large
+// so it reaches toward centre — keeping the gap to the copy tight.
 const SVC: P[] = [
-  { pos: [0.12, 0.34], cam: 4.0, ...BASE, accent: [0.886, 1.0, 0.318] },
-  { pos: [0.58, 0.08], cam: 4.0, ...BASE, accent: [0.5, 1.0, 0.72] },
-  { pos: [-0.58, -0.06], cam: 4.0, ...BASE, accent: [0.6, 0.95, 1.0] },
-  { pos: [0.42, -0.34], cam: 4.0, ...BASE, accent: [0.55, 0.82, 1.0] },
-  { pos: [-0.45, 0.1], cam: 4.0, ...BASE, accent: [0.886, 1.0, 0.318] },
+  { pos: [0.36, 0.08], cam: 3.3, ...BASE, accent: [0.886, 1.0, 0.318] },
+  { pos: [-0.36, -0.02], cam: 3.3, ...BASE, accent: [0.5, 1.0, 0.72] },
+  { pos: [0.36, 0.06], cam: 3.3, ...BASE, accent: [0.6, 0.95, 1.0] },
+  { pos: [-0.36, -0.02], cam: 3.3, ...BASE, accent: [0.55, 0.82, 1.0] },
+  { pos: [0.36, 0.04], cam: 3.3, ...BASE, accent: [0.886, 1.0, 0.318] },
 ];
 
 const clamp = (x: number, a: number, b: number) => Math.max(a, Math.min(b, x));
@@ -338,9 +342,16 @@ export default function ServicesSection() {
       // glide position, then pull to centre and zoom in for the finale
       const px = lerp(A.pos[0], B.pos[0], f);
       const py = lerp(A.pos[1], B.pos[1], f);
-      uniforms.uObjOffset.value.set(lerp(px, 0, finale), lerp(py, 0, finale));
       const baseCam = lerp(A.cam, B.cam, f);
-      uniforms.uCam.value = lerp(baseCam, 1.3, finale); // toward the face
+      if (window.innerWidth < 1024) {
+        // narrow screens have no room for side-travel — keep the object
+        // centred in the upper area with the copy stacked below it
+        uniforms.uObjOffset.value.set(0, lerp(0.34, 0, finale));
+        uniforms.uCam.value = lerp(5.0, 1.7, finale);
+      } else {
+        uniforms.uObjOffset.value.set(lerp(px, 0, finale), lerp(py, 0, finale));
+        uniforms.uCam.value = lerp(baseCam, 1.3, finale); // toward the face
+      }
       uniforms.uAccent.value.setRGB(
         lerp(A.accent[0], B.accent[0], f),
         lerp(A.accent[1], B.accent[1], f),
