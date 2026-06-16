@@ -197,14 +197,17 @@ type P = {
 const BASE = { open: 0.92, complex: 0.6, ui: 0, cloud: 0, emission: 0.3, evolve: 0.15 };
 // Object alternates right/left at mid-height (no bottom drops) and sits large
 // so it reaches toward centre — keeping the gap to the copy tight.
-// Object alternates right/left at mid-height (no bottom drops) and sits large
-// so it reaches toward centre — keeping the gap to the copy tight.
+// Descending diagonal zig-zag — each waypoint flips sides AND steps down a
+// little, so every move is a clear diagonal glide. The object is sized to stay
+// fully on screen across the whole descent (no roof/floor clipping), and each
+// service's copy is anchored to its waypoint height (see layoutStatements).
+// (Mobile overrides this to a centred object — see updateScene.)
 const SVC: P[] = [
-  { pos: [0.36, 0.08], cam: 3.3, ...BASE, accent: [0.886, 1.0, 0.318] },
-  { pos: [-0.36, -0.02], cam: 3.3, ...BASE, accent: [0.5, 1.0, 0.72] },
-  { pos: [0.36, 0.06], cam: 3.3, ...BASE, accent: [0.6, 0.95, 1.0] },
-  { pos: [-0.36, -0.02], cam: 3.3, ...BASE, accent: [0.55, 0.82, 1.0] },
-  { pos: [0.36, 0.04], cam: 3.3, ...BASE, accent: [0.886, 1.0, 0.318] },
+  { pos: [0.34, 0.15], cam: 4.8, ...BASE, accent: [0.886, 1.0, 0.318] },
+  { pos: [-0.34, 0.075], cam: 4.8, ...BASE, accent: [0.5, 1.0, 0.72] },
+  { pos: [0.34, 0.0], cam: 4.8, ...BASE, accent: [0.6, 0.95, 1.0] },
+  { pos: [-0.34, -0.075], cam: 4.8, ...BASE, accent: [0.55, 0.82, 1.0] },
+  { pos: [0.34, -0.15], cam: 4.8, ...BASE, accent: [0.886, 1.0, 0.318] },
 ];
 
 const clamp = (x: number, a: number, b: number) => Math.max(a, Math.min(b, x));
@@ -296,6 +299,41 @@ export default function ServicesSection() {
     const counter = section.querySelector<HTMLElement>(".svc-counter");
     const progressFill = section.querySelector<HTMLElement>(".svc-progress");
 
+    // Anchor each service's copy to its object waypoint: opposite side, same
+    // height (desktop). On mobile, fall back to the centred bottom layout.
+    const layoutStatements = () => {
+      const mobile = window.innerWidth < 1024;
+      statements.forEach((el, idx) => {
+        if (mobile) {
+          el.style.top = "";
+          el.style.bottom = "";
+          el.style.left = "";
+          el.style.right = "";
+          el.style.maxWidth = "";
+          el.style.alignItems = "";
+          el.style.textAlign = "";
+          el.style.transform = "";
+        } else {
+          const wpY = SVC[idx].pos[1];
+          el.style.top = `${(0.5 - wpY) * 100}%`;
+          el.style.bottom = "auto";
+          el.style.transform = "translateY(-50%)";
+          el.style.maxWidth = "24rem";
+          el.style.alignItems = "flex-start";
+          el.style.textAlign = "left";
+          if (SERVICES[idx].side === "right") {
+            el.style.right = "7%";
+            el.style.left = "auto";
+          } else {
+            el.style.left = "7%";
+            el.style.right = "auto";
+          }
+        }
+      });
+    };
+    layoutStatements();
+    window.addEventListener("resize", layoutStatements);
+
     const target = new THREE.Vector2(0, 0);
     const current = new THREE.Vector2(0, 0);
     let active = 0;
@@ -366,7 +404,6 @@ export default function ServicesSection() {
         if (j === last) op = Math.max(op, smoothstep(last - 0.42, last, u));
         op *= 1 - finale;
         statements[j].style.opacity = String(op);
-        statements[j].style.transform = `translateY(${(1 - op) * 14}px)`;
       }
 
       const activeIdx = clamp(Math.round(u), 0, navItems.length - 1);
@@ -427,20 +464,13 @@ export default function ServicesSection() {
       io.disconnect();
       ro.disconnect();
       window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("resize", layoutStatements);
       document.removeEventListener("visibilitychange", onVis);
       geometry.dispose();
       material.dispose();
       renderer.dispose();
     };
   }, []);
-
-  const sideCls = (side: string) => {
-    if (side === "right")
-      return "lg:inset-x-auto lg:bottom-auto lg:top-1/2 lg:right-[7%] lg:max-w-sm lg:-translate-y-1/2 lg:items-start lg:text-left";
-    if (side === "left")
-      return "lg:inset-x-auto lg:bottom-auto lg:top-1/2 lg:left-[7%] lg:max-w-sm lg:-translate-y-1/2 lg:items-start lg:text-left";
-    return ""; // center — keep the default bottom-centered layout (finale)
-  };
 
   return (
     <section ref={sectionRef} className="relative h-[560vh] bg-black">
@@ -468,7 +498,7 @@ export default function ServicesSection() {
         {SERVICES.map((s) => (
           <div
             key={s.num}
-            className={`svc-statement pointer-events-none absolute inset-x-6 bottom-[9%] flex flex-col items-center text-center opacity-0 will-change-[opacity,transform] ${sideCls(s.side)}`}
+            className="svc-statement pointer-events-none absolute inset-x-6 bottom-[9%] flex flex-col items-center text-center opacity-0 will-change-[opacity]"
           >
             <div className="mb-4 flex items-center gap-3 font-mono text-[11px] tracking-[0.4em] text-[#e1ff51]">
               <span>{s.num}</span>
