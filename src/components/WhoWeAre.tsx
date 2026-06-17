@@ -270,15 +270,22 @@ export default function WhoWeAre() {
       return clamp(-rect.top / Math.max(total, 1), 0, 1);
     };
 
+    const N = LAYERS.length; // 4 parts
+    const INTRO = 0.08; // hold the bare scene briefly before the first reveals
+    const OUTRO = 0.08; // and after the last, so nothing pops during the seam
     const updateOverlay = (p: number) => {
-      const c = p * 3;
+      // Distribute all four parts across the *pinned* scroll. Each owns a window
+      // centred at i+0.5, so the first fades IN after entry (not pre-shown during
+      // the transition) and the last fades out before the exit seam.
+      const fp = clamp((p - INTRO) / (1 - INTRO - OUTRO), 0, 1);
+      const c = fp * N; // 0..N
       for (let i = 0; i < statements.length; i++) {
-        const op = smoothstep(0.55, 0.14, Math.abs(c - i));
+        const op = smoothstep(0.5, 0.16, Math.abs(c - (i + 0.5)));
         statements[i].style.opacity = String(op);
-        statements[i].style.transform = `translateY(${(i - c) * 20}px)`;
+        statements[i].style.transform = `translateY(${(i + 0.5 - c) * 22}px)`;
         statements[i].style.filter = `blur(${(1 - op) * 8}px)`;
       }
-      const activeIdx = clamp(Math.round(c), 0, navItems.length - 1);
+      const activeIdx = clamp(Math.floor(c), 0, navItems.length - 1);
       for (let i = 0; i < navItems.length; i++) {
         const on = i === activeIdx;
         navItems[i].style.opacity = on ? "1" : "0.3";
@@ -345,7 +352,8 @@ export default function WhoWeAre() {
     <section ref={sectionRef} className="relative h-[440vh] bg-black">
       <div
         ref={stageRef}
-        className="sticky top-0 h-svh w-full overflow-hidden text-[#eaf7ee]"
+        data-seam-scene
+        className="fixed inset-0 overflow-hidden text-[#eaf7ee] will-change-[opacity,transform]"
       >
         <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
         {failed && (

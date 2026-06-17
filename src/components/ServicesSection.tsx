@@ -363,7 +363,11 @@ export default function ServicesSection() {
       // One continuous, eased flight through every waypoint. The object never
       // holds-then-snaps; it floats the whole time and only decelerates as it
       // nears each capability — that's when the text reveals.
-      const fp = clamp(p / FLIGHT, 0, 1);
+      // Hold the object at the first stop during a short intro (it emerges from
+      // black here), then begin the flight — so service 01 gets a full dwell
+      // *after* the morph has arrived, instead of flashing during the entry seam.
+      const INTRO = 0.1;
+      const fp = clamp((p - INTRO) / (FLIGHT - INTRO), 0, 1);
       const u = fp * SEGS;
       const i = clamp(Math.floor(u), 0, SEGS - 1);
       const f = easeInOut(clamp(u - i, 0, 1));
@@ -397,12 +401,16 @@ export default function ServicesSection() {
       );
       uniforms.uProgress.value = p;
 
+      // fade the copy in only after the morph has emerged from black
+      // (uProgress drives that), so no text shows during the entry seam
+      const intro = smoothstep(0.03, INTRO, p);
+
       // each capability's text reveals as the object settles; cleared on zoom
       const last = N - 1;
       for (let j = 0; j < statements.length; j++) {
         let op = smoothstep(0.42, 0.08, Math.abs(u - j));
         if (j === last) op = Math.max(op, smoothstep(last - 0.42, last, u));
-        op *= 1 - finale;
+        op *= (1 - finale) * intro;
         statements[j].style.opacity = String(op);
       }
 
@@ -476,7 +484,8 @@ export default function ServicesSection() {
     <section ref={sectionRef} className="relative h-[560vh] bg-black">
       <div
         ref={stageRef}
-        className="sticky top-0 h-svh w-full overflow-hidden text-[#eaf7ee]"
+        data-seam-scene
+        className="fixed inset-0 overflow-hidden text-[#eaf7ee] will-change-[opacity,transform]"
       >
         <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
         {failed && (

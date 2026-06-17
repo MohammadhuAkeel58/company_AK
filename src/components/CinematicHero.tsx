@@ -338,7 +338,8 @@ export default function CinematicHero() {
   return (
     <main
       ref={root}
-      className="relative h-svh w-full overflow-hidden bg-black text-[#eaf7ee]"
+      data-seam-scene
+      className="relative h-svh w-full overflow-hidden bg-black text-[#eaf7ee] will-change-[opacity,transform]"
     >
       {/* WebGL canvas */}
       <canvas
