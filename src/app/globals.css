@@ -4,14 +4,23 @@
   --background: #000000;
   --foreground: #eaf7ee;
   --accent: #e1ff51;
+
+  /* The morph's signature palette — the same lime + deep teal that the
+     raymarched hero object is lit with. Threaded through every section so the
+     whole page reads as one continuous, morph-lit world. */
+  --morph-lime: #e1ff51;
+  --morph-teal: #00272c;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-accent: var(--accent);
+  --color-morph-lime: var(--morph-lime);
+  --color-morph-teal: var(--morph-teal);
   --font-sans: var(--font-display);
   --font-mono: var(--font-mono);
+  --font-heading: var(--font-heading-face);
 }
 
 html,
@@ -21,7 +30,26 @@ body {
 }
 
 body {
-  background: var(--background);
+  /* A fixed, continuous teal wash sitting under the whole document: a deep
+     morph-teal breath at the top and bottom fading through near-black in the
+     middle. Because it's fixed, it stays put while sections scroll over it,
+     giving every section the same underlying shade of the morph. */
+  background:
+    radial-gradient(
+      140% 70% at 50% -10%,
+      rgba(0, 39, 44, 0.55) 0%,
+      rgba(0, 39, 44, 0.12) 38%,
+      transparent 70%
+    ),
+    radial-gradient(
+      140% 70% at 50% 110%,
+      rgba(0, 39, 44, 0.45) 0%,
+      rgba(0, 39, 44, 0.1) 40%,
+      transparent 72%
+    ),
+    #020405;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
   color: var(--foreground);
   font-family: var(--font-display), Arial, Helvetica, sans-serif;
 }

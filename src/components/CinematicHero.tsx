@@ -317,20 +317,10 @@ export default function CinematicHero() {
     () => {
       gsap.set(".cin-canvas", { autoAlpha: 0 });
       gsap.set(".cin-fade", { autoAlpha: 0, y: 22 });
-      gsap.set(".cin-line", { scaleX: 0, transformOrigin: "left center" });
 
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
       tl.to(".cin-canvas", { autoAlpha: 1, duration: 1.8 }, 0)
-        .to(".cin-line", { scaleX: 1, duration: 1.1, ease: "power2.inOut" }, 0.5)
         .to(".cin-fade", { autoAlpha: 1, y: 0, duration: 1, stagger: 0.12 }, 0.6);
-
-      gsap.to(".cin-arrow", {
-        y: 7,
-        duration: 1,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut",
-      });
     },
     { scope: root },
   );
@@ -358,50 +348,16 @@ export default function CinematicHero() {
       <div className="pointer-events-none absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-black/70 to-transparent" />
       <div className="pointer-events-none absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
 
-      {/* Overlay UI */}
-      <div className="pointer-events-none absolute inset-0 flex flex-col justify-between p-6 sm:p-9 lg:p-12">
-        {/* Top bar */}
-        <header className="flex items-start justify-between">
-          <div className="cin-fade flex items-start gap-0.5">
-            <span className="text-xl font-bold tracking-tight sm:text-2xl">
-              NEXORA
-            </span>
-            <span className="mt-1 font-mono text-[10px]">™</span>
-          </div>
-          <button
-            aria-label="Open menu"
-            className="cin-fade group pointer-events-auto flex cursor-pointer items-center gap-2.5 font-mono text-xs tracking-[0.25em] outline-none sm:text-sm"
-          >
-            <span className="flex flex-col gap-[5px]">
-              <span className="h-px w-6 bg-[#eaf7ee] transition-colors group-hover:bg-[#e1ff51]" />
-              <span className="h-px w-6 bg-[#eaf7ee] transition-colors group-hover:bg-[#e1ff51]" />
-            </span>
-            <span className="transition-colors group-hover:text-[#e1ff51]">
-              MENU
-            </span>
-          </button>
-        </header>
-
+      {/* Overlay UI — top navigation now lives in the global <Navbar /> */}
+      <div className="pointer-events-none absolute inset-0 flex flex-col justify-end p-6 sm:p-9 lg:p-12">
         {/* Bottom block */}
         <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-5xl">
-            <div className="cin-fade mb-6 flex items-center gap-3 font-mono text-[10px] tracking-[0.3em] text-[#e1ff51] sm:text-xs">
-              <span className="cin-line h-px w-10 bg-[#e1ff51]" />
-              NEXORA — DIGITAL ENGINEERING
-            </div>
-            <h1 className="cin-fade text-balance text-5xl font-bold leading-[0.92] tracking-[-0.03em] sm:text-7xl lg:text-8xl xl:text-9xl">
+            <h1 className="cin-fade font-heading text-balance text-4xl leading-[1.32] tracking-[-0.01em] sm:text-6xl lg:text-7xl xl:text-8xl">
               We build{" "}
               <span className="text-[#e1ff51]">impossible</span>
               <br className="hidden sm:block" /> digital experiences.
             </h1>
-          </div>
-
-          {/* Scroll cue */}
-          <div className="cin-fade flex shrink-0 items-center gap-4 self-start lg:flex-col lg:items-end lg:self-end">
-            <span className="font-mono text-[10px] tracking-[0.3em] text-[#eaf7ee]/55">
-              SCROLL
-            </span>
-            <span className="cin-arrow text-lg text-[#e1ff51]">↓</span>
           </div>
         </div>
       </div>
