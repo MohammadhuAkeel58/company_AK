@@ -5,8 +5,6 @@ import Services from "@/components/Services";
 import Work from "@/components/Work";
 import Stack from "@/components/Stack";
 import Process from "@/components/Process";
-import Contact from "@/components/Contact";
-import Footer from "@/components/Footer";
 import SmoothScroll from "@/components/SmoothScroll";
 
 export default function Home() {
@@ -20,8 +18,6 @@ export default function Home() {
       <Work />
       <Stack />
       <Process />
-      <Contact />
-      <Footer />
     </>
   );
 }
