@@ -353,7 +353,7 @@ export default function CinematicHero() {
         {/* Bottom block */}
         <div className="flex flex-col gap-10 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-5xl">
-            <h1 className="cin-fade font-heading text-balance text-4xl leading-[1.32] tracking-[-0.01em] sm:text-6xl lg:text-7xl xl:text-8xl">
+            <h1 className="cin-fade font-heading text-balance text-5xl leading-[1.18] tracking-[-0.02em] sm:text-7xl lg:text-8xl xl:text-9xl">
               We build{" "}
               <span className="text-[#e1ff51]">impossible</span>
               <br className="hidden sm:block" /> digital experiences.

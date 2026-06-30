@@ -72,16 +72,6 @@ const getProjectData = (index: number) => {
   return PROJECT_DATA[i];
 };
 
-const getProjectNumber = (index: number) => {
-  return (
-    (((Math.abs(index) % PROJECT_DATA.length) + PROJECT_DATA.length) %
-      PROJECT_DATA.length) +
-    1
-  )
-    .toString()
-    .padStart(2, "0");
-};
-
 export function Component() {
   const [visibleRange, setVisibleRange] = React.useState({
     min: -CONFIG.BUFFER_SIZE,
@@ -97,16 +87,34 @@ export function Component() {
     lastScrollTime: Date.now(),
     dragStart: { y: 0, scrollY: 0 },
     projectHeight: 0, // set from the container on mount
-    minimapHeight: 220,
   });
 
   // The component is scoped to this container (NOT window) so it never hijacks
   // the page's smooth scroll — it only reacts while you interact with it.
   const containerRef = React.useRef<HTMLDivElement>(null);
   const projectsRef = React.useRef<Map<number, HTMLDivElement>>(new Map());
-  const minimapRef = React.useRef<Map<number, HTMLDivElement>>(new Map());
-  const infoRef = React.useRef<Map<number, HTMLDivElement>>(new Map());
+  const captionTitleRef = React.useRef<HTMLParagraphElement>(null);
+  const captionYearRef = React.useRef<HTMLParagraphElement>(null);
+  const captionIndexRef = React.useRef<number | null>(null);
   const requestRef = React.useRef<number>(undefined);
+
+  // Swap the centered caption's title/year whenever a new project takes focus,
+  // with a quick cross-fade. Lives at the container level (above every project
+  // layer) so it's never trapped behind an image's stacking context.
+  const syncCaption = (index: number) => {
+    if (captionIndexRef.current === index) return;
+    captionIndexRef.current = index;
+    const data = getProjectData(index);
+    const title = captionTitleRef.current;
+    const year = captionYearRef.current;
+    if (!title || !year) return;
+    title.textContent = data.title;
+    year.textContent = data.year;
+    title.parentElement!.style.opacity = "0";
+    requestAnimationFrame(() => {
+      if (title.parentElement) title.parentElement.style.opacity = "1";
+    });
+  };
 
   // playback + manual navigation
   const [playing, setPlaying] = React.useState(true);
@@ -163,23 +171,11 @@ export function Component() {
   const updatePositions = () => {
     const s = state.current;
     if (!s.projectHeight) return;
-    const minimapY = (s.currentY * s.minimapHeight) / s.projectHeight;
 
     projectsRef.current.forEach((el, index) => {
       const y = index * s.projectHeight + s.currentY;
       el.style.transform = `translateY(${y}px)`;
       updateParallax(el.querySelector("img"), s.currentY, index, s.projectHeight);
-    });
-
-    minimapRef.current.forEach((el, index) => {
-      const y = index * s.minimapHeight + minimapY;
-      el.style.transform = `translateY(${y}px)`;
-      updateParallax(el.querySelector("img"), minimapY, index, s.minimapHeight);
-    });
-
-    infoRef.current.forEach((el, index) => {
-      const y = index * s.minimapHeight + minimapY;
-      el.style.transform = `translateY(${y}px)`;
     });
   };
 
@@ -212,6 +208,8 @@ export function Component() {
 
     const s = state.current;
     if (s.projectHeight) {
+      // caption follows the visually-centered (lerped) project
+      syncCaption(Math.round(-s.currentY / s.projectHeight));
       const currentIndex = Math.round(-s.targetY / s.projectHeight);
       const min = currentIndex - CONFIG.BUFFER_SIZE;
       const max = currentIndex + CONFIG.BUFFER_SIZE;
@@ -280,6 +278,7 @@ export function Component() {
     window.addEventListener("resize", onResize);
 
     onResize();
+    syncCaption(0);
     if (!reduce) requestRef.current = requestAnimationFrame(animationLoop);
     else updatePositions();
 
@@ -340,77 +339,44 @@ export function Component() {
           will-change: transform;
           transform: scale(1.35);
         }
-        /* readability scrim under the minimap */
+        /* readability scrim behind the centered caption */
         .parallax-container::after {
           content: "";
           position: absolute; inset: 0;
           pointer-events: none;
           background:
-            radial-gradient(120% 80% at 15% 100%, rgba(0,0,0,0.7), transparent 55%),
-            linear-gradient(180deg, rgba(0,0,0,0.25), transparent 30%, transparent 70%, rgba(0,0,0,0.35));
+            radial-gradient(120% 90% at 50% 50%, rgba(0,0,0,0.55), transparent 72%),
+            linear-gradient(180deg, rgba(0,0,0,0.3), transparent 32%, transparent 68%, rgba(0,0,0,0.3));
         }
-        .minimap {
-          position: absolute;
-          left: 1.75rem; bottom: 1.75rem;
-          height: 220px;
-          display: flex;
+        /* big title + year centered over each project image */
+        .project-caption {
+          position: absolute; inset: 0;
           z-index: 2;
+          display: flex; flex-direction: column;
+          align-items: center; justify-content: center;
+          gap: 1.25rem;
+          padding: 1.5rem;
+          text-align: center;
           pointer-events: none;
+          transition: opacity .4s ease;
         }
-        .minimap-wrapper { display: flex; gap: 1rem; height: 100%; }
-        .minimap-img-preview {
-          position: relative;
-          width: 84px; height: 100%;
-          overflow: hidden;
-          border-radius: 0.75rem;
-          border: 1px solid rgba(234,247,238,0.18);
+        @media (prefers-reduced-motion: reduce) {
+          .project-caption { transition: none; }
         }
-        .minimap-img-item {
-          position: absolute; top: 0; left: 0;
-          width: 100%; height: 220px;
-          overflow: hidden;
-          will-change: transform;
-        }
-        .minimap-img-item img {
-          width: 100%; height: 100%;
-          object-fit: cover;
-          will-change: transform;
-          transform: scale(1.35);
-        }
-        .minimap-info-list {
-          position: relative;
-          width: 240px; height: 100%;
-          overflow: hidden;
-        }
-        .minimap-item-info {
-          position: absolute; top: 0; left: 0;
-          width: 100%; height: 220px;
-          display: flex; flex-direction: column; justify-content: center;
-          gap: 0.55rem;
-          color: #eaf7ee;
-          will-change: transform;
-        }
-        .minimap-item-info-row {
-          display: flex; justify-content: space-between; gap: 0.75rem;
-        }
-        .minimap-item-info-row:first-child p:first-child {
-          font-family: var(--font-mono), monospace;
-          font-size: 11px; letter-spacing: 0.2em;
-          color: #e1ff51;
-        }
-        .minimap-item-info-row:first-child p:last-child {
+        .project-caption .pc-title {
           font-family: var(--font-heading), sans-serif;
-          font-size: 1.6rem; letter-spacing: 0.02em; line-height: 1;
+          font-size: clamp(2.75rem, 9vw, 7rem);
+          line-height: 0.92;
+          letter-spacing: -0.02em;
+          color: #eaf7ee;
+          text-shadow: 0 4px 40px rgba(0,0,0,0.55);
         }
-        .minimap-item-info-row:nth-child(2) p {
+        .project-caption .pc-year {
           font-family: var(--font-mono), monospace;
-          font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
-          color: rgba(234,247,238,0.6);
-        }
-        .minimap-item-info-row:nth-child(3) p {
-          font-size: 0.85rem; line-height: 1.4;
-          color: rgba(234,247,238,0.7);
-          max-width: 22ch;
+          font-size: clamp(0.95rem, 2.4vw, 1.5rem);
+          letter-spacing: 0.4em;
+          color: #e1ff51;
+          text-shadow: 0 2px 24px rgba(0,0,0,0.55);
         }
         .slider-controls {
           position: absolute;
@@ -437,11 +403,6 @@ export function Component() {
         .slider-controls button:active { transform: scale(0.92); }
         .slider-controls svg { width: 16px; height: 16px; display: block; }
         @media (max-width: 640px) {
-          .minimap { left: 1rem; bottom: 1rem; height: 180px; }
-          .minimap-img-item, .minimap-item-info { height: 180px; }
-          .minimap-img-preview { width: 60px; }
-          .minimap-info-list { width: 180px; }
-          .minimap-item-info-row:first-child p:last-child { font-size: 1.25rem; }
           .slider-controls { right: 1rem; bottom: 1rem; }
         }
       `}</style>
@@ -496,55 +457,11 @@ export function Component() {
         })}
       </div>
 
-      <div className="minimap">
-        <div className="minimap-wrapper">
-          <div className="minimap-img-preview">
-            {indices.map((i) => {
-              const data = getProjectData(i);
-              return (
-                <div
-                  key={i}
-                  className="minimap-img-item"
-                  ref={(el) => {
-                    if (el) minimapRef.current.set(i, el);
-                    else minimapRef.current.delete(i);
-                  }}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={data.image} alt={data.title} draggable={false} />
-                </div>
-              );
-            })}
-          </div>
-          <div className="minimap-info-list">
-            {indices.map((i) => {
-              const data = getProjectData(i);
-              const num = getProjectNumber(i);
-              return (
-                <div
-                  key={i}
-                  className="minimap-item-info"
-                  ref={(el) => {
-                    if (el) infoRef.current.set(i, el);
-                    else infoRef.current.delete(i);
-                  }}
-                >
-                  <div className="minimap-item-info-row">
-                    <p>{num}</p>
-                    <p>{data.title}</p>
-                  </div>
-                  <div className="minimap-item-info-row">
-                    <p>{data.category}</p>
-                    <p>{data.year}</p>
-                  </div>
-                  <div className="minimap-item-info-row">
-                    <p>{data.description}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
+      {/* big title + year centered over the focused image, kept in sync by the
+          animation loop so it always sits above every project layer */}
+      <div className="project-caption">
+        <p className="pc-title" ref={captionTitleRef} />
+        <p className="pc-year" ref={captionYearRef} />
       </div>
     </div>
   );

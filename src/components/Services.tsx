@@ -49,7 +49,7 @@ export default function Services() {
   return (
     <section
       id="services"
-      className="relative overflow-hidden border-t border-[#eaf7ee]/12 px-6 py-24 text-[#eaf7ee] sm:px-9 lg:px-12 lg:py-36"
+      className="relative z-30 -mt-[100vh] overflow-hidden rounded-t-[2.5rem] border-t border-[#eaf7ee]/12 bg-[#04090c] px-6 py-24 text-[#eaf7ee] shadow-[0_-30px_70px_-20px_rgba(0,0,0,0.65)] sm:px-9 lg:px-12 lg:py-36"
     >
       <style>{`
         .svc-name {
@@ -76,7 +76,7 @@ export default function Services() {
       <div ref={ref} className="relative mx-auto max-w-6xl">
         {/* eyebrow */}
         <h2
-          className="max-w-3xl font-heading text-balance text-3xl leading-[1.3] tracking-[-0.01em] transition-all duration-700 motion-reduce:transition-none sm:text-4xl lg:text-5xl"
+          className="max-w-4xl font-heading text-balance text-4xl leading-[1.22] tracking-[-0.015em] transition-all duration-700 motion-reduce:transition-none sm:text-5xl lg:text-6xl"
           style={{ opacity: shown ? 1 : 0, transform: shown ? "none" : "translateY(20px)" }}
         >
           Every discipline it takes to turn complexity into{" "}
@@ -101,11 +101,11 @@ export default function Services() {
                   <span className="font-mono text-[10px] tracking-[0.3em] text-[#eaf7ee]/40 transition-colors group-hover:text-[#e1ff51] group-focus-within:text-[#e1ff51]">
                     {c.domain}
                   </span>
-                  <h3 className="svc-name mt-2.5 text-[2rem] font-bold leading-[0.95] tracking-[-0.02em] sm:text-5xl lg:text-[4rem]">
+                  <h3 className="svc-name mt-2.5 text-[2.6rem] font-bold leading-[0.95] tracking-[-0.02em] sm:text-6xl lg:text-[5rem]">
                     {c.name}
                   </h3>
                   {/* spec: always visible on mobile, reveals on hover from lg up */}
-                  <p className="svc-reveal mt-3 max-w-md text-sm leading-relaxed text-[#eaf7ee]/45 transition-all duration-500 lg:mt-0 lg:max-h-0 lg:overflow-hidden lg:opacity-0 lg:group-hover:mt-4 lg:group-hover:max-h-24 lg:group-hover:opacity-100 lg:group-focus-within:mt-4 lg:group-focus-within:max-h-24 lg:group-focus-within:opacity-100">
+                  <p className="svc-reveal mt-3 max-w-lg text-base leading-relaxed text-[#eaf7ee]/45 transition-all duration-500 lg:mt-0 lg:max-h-0 lg:overflow-hidden lg:opacity-0 lg:group-hover:mt-4 lg:group-hover:max-h-28 lg:group-hover:opacity-100 lg:group-focus-within:mt-4 lg:group-focus-within:max-h-28 lg:group-focus-within:opacity-100">
                     {c.spec}
                   </p>
                 </div>

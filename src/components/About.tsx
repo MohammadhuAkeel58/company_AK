@@ -33,8 +33,10 @@ export default function About() {
       const rect = section.getBoundingClientRect();
       const total = section.offsetHeight - window.innerHeight;
       const p = clamp(-rect.top / Math.max(total, 1), 0, 1);
-      // the fill sweeps over the middle ~72% of the section's scroll
-      const cursor = clamp((p - 0.08) / 0.72, 0, 1) * (totalLetters + 8) - 4;
+      // The fill completes in the first ~43% of the scroll, then About simply
+      // holds — fully lit and pinned — so the whole statement is readable before
+      // the next section rises up and overlays it.
+      const cursor = clamp((p - 0.08) / 0.35, 0, 1) * (totalLetters + 8) - 4;
       for (let i = 0; i < refs.current.length; i++) {
         const el = refs.current[i];
         if (!el) continue;
@@ -62,11 +64,11 @@ export default function About() {
     <section
       id="about"
       ref={sectionRef}
-      className="relative h-[220vh] text-[#eaf7ee]"
+      className="relative z-0 h-[340vh] text-[#eaf7ee]"
     >
       <div className="sticky top-0 flex h-svh items-center overflow-hidden px-6 sm:px-9 lg:px-12">
         <div className="mx-auto w-full max-w-5xl text-center">
-          <p className="font-heading text-[1.9rem] font-medium leading-[1.38] tracking-[-0.01em] sm:text-5xl sm:leading-[1.32] lg:text-[4.25rem] lg:leading-[1.3]">
+          <p className="font-heading text-[2.4rem] font-medium leading-[1.32] tracking-[-0.015em] sm:text-6xl sm:leading-[1.26] lg:text-[5.25rem] lg:leading-[1.22]">
             {words.map((w, wi) => (
               <Fragment key={wi}>
                 <span className="inline-block">

@@ -12,12 +12,12 @@ export default function Contact() {
       <div className="pointer-events-none absolute left-1/2 top-1/2 h-[34rem] w-[34rem] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(225,255,81,0.08),transparent_70%)] blur-3xl" />
 
       <div className="relative mx-auto max-w-3xl text-center">
-        <h2 className="font-heading text-balance text-4xl leading-[1.28] tracking-[-0.01em] sm:text-6xl lg:text-7xl">
+        <h2 className="font-heading text-balance text-5xl leading-[1.16] tracking-[-0.02em] sm:text-7xl lg:text-8xl">
           Let&apos;s build something{" "}
           <span className="text-[#e1ff51]">impossible</span>.
         </h2>
 
-        <p className="mx-auto mt-6 max-w-xl text-base leading-relaxed text-[#eaf7ee]/60 lg:text-lg">
+        <p className="mx-auto mt-7 max-w-xl text-lg leading-relaxed text-[#eaf7ee]/60 lg:text-xl">
           Tell us where you&apos;re headed and what&apos;s in the way. We&apos;ll
           come back with a clear path — and the team to build it.
         </p>
